@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - INSTALL_DEV=true
     entrypoint: ['/usr/src/app/entrypoint.sh']
     volumes:
       - .:/usr/src/app
