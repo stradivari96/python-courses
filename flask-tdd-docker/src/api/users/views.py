@@ -3,7 +3,7 @@ from http import HTTPStatus
 from flask import Blueprint, request
 from flask_restx import Api, Resource, fields
 
-from src.api.crud import (
+from src.api.users.crud import (
     get_all_users,
     get_user_by_email,
     add_user,
