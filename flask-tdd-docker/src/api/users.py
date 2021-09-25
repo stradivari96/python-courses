@@ -1,6 +1,7 @@
 from http import HTTPStatus
+
 from flask import Blueprint, request
-from flask_restx import Resource, Api, fields
+from flask_restx import Api, Resource, fields
 
 from src import db
 from src.api.models import User
