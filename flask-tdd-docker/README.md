@@ -5,7 +5,7 @@ https://testdriven.io/courses/tdd-flask
 ## Develop
 ```
 docker-compose up
-docker-compose exec api pytest "src/tests"
+docker-compose exec api pytest -sv "src/tests"
 docker-compose exec api flask shell
 docker-compose exec api python manage.py recreate_db
 docker-compose exec api-db psql -U postgres
