@@ -3,13 +3,19 @@ from http import HTTPStatus
 from flask import Blueprint, request
 from flask_restx import Api, Resource, fields
 
-from src import db
-from src.api.models import User
+from src.api.crud import (
+    get_all_users,
+    get_user_by_email,
+    add_user,
+    get_user_by_id,
+    update_user,
+    delete_user,
+)
 
 users_blueprint = Blueprint("users", __name__)
 api = Api(users_blueprint)
 
-user = api.model(
+user_model = api.model(
     "User",
     {
         "id": fields.Integer(readOnly=True),
@@ -21,70 +27,66 @@ user = api.model(
 
 
 class UsersList(Resource):
-    @api.expect(user, validate=True)
+    @api.expect(user_model, validate=True)
     def post(self):
         post_data = request.get_json()
         username = post_data.get("username")
         email = post_data.get("email")
         response_object = {}
 
-        user = User.query.filter_by(email=email).first()
+        user = get_user_by_email(email)
         if user:
             response_object["message"] = "Sorry. That email already exists."
             return response_object, HTTPStatus.BAD_REQUEST
 
-        db.session.add(User(username=username, email=email))
-        db.session.commit()
+        add_user(username, email)
 
         response_object["message"] = f"{email} was added!"
         return response_object, HTTPStatus.CREATED
 
-    @api.marshal_with(user, as_list=True)
+    @api.marshal_with(user_model, as_list=True)
     def get(self):
-        return User.query.all(), HTTPStatus.OK
+        return get_all_users(), HTTPStatus.OK
 
 
 class Users(Resource):
-    @api.marshal_with(user)
+    @api.marshal_with(user_model)
     def get(self, user_id):
-        u = User.query.filter_by(id=user_id).first()
-        if not u:
+        user = get_user_by_id(user_id)
+        if not user:
             api.abort(HTTPStatus.NOT_FOUND, f"User {user_id} does not exist")
-        return u, HTTPStatus.OK
+        return user, HTTPStatus.OK
 
     def delete(self, user_id):
         response_object = {}
-        u = User.query.filter_by(id=user_id).first()
+        user = get_user_by_id(user_id)
 
-        if not u:
+        if not user:
             api.abort(HTTPStatus.NOT_FOUND, f"User {user_id} does not exist")
 
-        db.session.delete(u)
-        db.session.commit()
+        delete_user(user)
 
-        response_object["message"] = f"{u.email} was removed!"
+        response_object["message"] = f"{user.email} was removed!"
         return response_object, HTTPStatus.OK
 
-    @api.expect(user, validate=True)
+    @api.expect(user_model, validate=True)
     def put(self, user_id):
         post_data = request.get_json()
         username = post_data.get("username")
         email = post_data.get("email")
         response_object = {}
 
-        u = User.query.filter_by(id=user_id).first()
-        if not u:
+        user = get_user_by_id(user_id)
+        if not user:
             api.abort(404, f"User {user_id} does not exist")
 
-        if User.query.filter_by(email=email).first():
+        if get_user_by_email(email):
             response_object["message"] = "Sorry. That email already exists."
             return response_object, 400
 
-        u.username = username
-        u.email = email
-        db.session.commit()
+        update_user(user, username, email)
 
-        response_object["message"] = f"{u.id} was updated!"
+        response_object["message"] = f"{user.id} was updated!"
         return response_object, 200
 
 
