@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -8,6 +9,7 @@ from .models import Trip
 class UserSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
+    group = serializers.CharField()
 
     def validate(self, data):
         if data["password1"] != data["password2"]:
@@ -15,6 +17,8 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        group_data = validated_data.pop("group")
+        group, _ = Group.objects.get_or_create(name=group_data)
         data = {
             key: value
             for key, value in validated_data.items()
@@ -32,6 +36,8 @@ class UserSerializer(serializers.ModelSerializer):
             "password2",
             "first_name",
             "last_name",
+            "group",
+            "photo",
         )
         read_only_fields = ("id",)
 
