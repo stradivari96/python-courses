@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "bumbo"
+version = "0.1.0"
+description = ""
+authors = ["Xiang Chen <xiangchenchen96@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+WebOb = "^1.8.7"
+pygame = "^2.0.1"
+parse = "^1.19.0"
+
+[tool.poetry.dev-dependencies]
+waitress = "^2.0.0"
+gunicorn = "^20.1.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
